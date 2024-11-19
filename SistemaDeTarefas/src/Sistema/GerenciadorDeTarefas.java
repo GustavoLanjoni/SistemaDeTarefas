@@ -2,14 +2,16 @@ package Sistema;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class GerenciadorDeTarefas {
     private JFrame frame;
-    private DefaultListModel<Tarefa> modeloTarefas; // Corrigido para Tarefa
+    private DefaultListModel<Tarefa> modeloTarefas;
     private JList<Tarefa> listaTarefas;
     private ArrayList<Tarefa> tarefas;
+    private JLabel lblRelogio;
 
     public GerenciadorDeTarefas() {
         tarefas = new ArrayList<>();
@@ -17,10 +19,17 @@ public class GerenciadorDeTarefas {
         listaTarefas = new JList<>(modeloTarefas);
 
         frame = new JFrame("Gerenciador de Tarefas");
-        frame.setSize(400, 300);
+        frame.setSize(500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
+        // Relógio em tempo real
+        lblRelogio = new JLabel();
+        lblRelogio.setFont(new Font("Arial", Font.BOLD, 16));
+        lblRelogio.setHorizontalAlignment(SwingConstants.CENTER);
+        atualizarRelogio();
+
+        // Botões
         JButton btnAdicionar = new JButton("Adicionar");
         JButton btnRemover = new JButton("Remover");
         JButton btnEditar = new JButton("Editar");
@@ -30,6 +39,8 @@ public class GerenciadorDeTarefas {
         painelBotoes.add(btnEditar);
         painelBotoes.add(btnRemover);
 
+        // Adicionando componentes à janela
+        frame.add(lblRelogio, BorderLayout.NORTH); // Relógio na parte superior
         frame.add(new JScrollPane(listaTarefas), BorderLayout.CENTER);
         frame.add(painelBotoes, BorderLayout.SOUTH);
 
@@ -39,12 +50,16 @@ public class GerenciadorDeTarefas {
         btnRemover.addActionListener(e -> removerTarefa());
 
         frame.setVisible(true);
+
+        // Iniciar o relógio em tempo real
+        iniciarTimerRelogio();
     }
 
     private void adicionarTarefa() {
         String titulo = JOptionPane.showInputDialog(frame, "Título da Tarefa:");
         if (titulo != null && !titulo.trim().isEmpty()) {
-            Tarefa novaTarefa = new Tarefa(titulo, "Descrição não definida", "Pendente");
+            String descricao = JOptionPane.showInputDialog(frame, "Descrição da Tarefa:");
+            Tarefa novaTarefa = new Tarefa(titulo, descricao != null ? descricao : "Descrição não definida", "Pendente");
             tarefas.add(novaTarefa);
             modeloTarefas.addElement(novaTarefa);
         }
@@ -73,12 +88,22 @@ public class GerenciadorDeTarefas {
         }
     }
 
+    private void atualizarRelogio() {
+        SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm:ss");
+        lblRelogio.setText("Hora atual: " + formatoHora.format(new Date()));
+    }
+
+    private void iniciarTimerRelogio() {
+        Timer timer = new Timer(1000, e -> atualizarRelogio());
+        timer.start();
+    }
+
     public static void main(String[] args) {
-        new GerenciadorDeTarefas(); // Corrigido para usar o nome correto
+        new GerenciadorDeTarefas();
     }
 }
 
-// Classe Tarefa (Adicione-a no mesmo arquivo ou em um arquivo separado)
+// Classe Tarefa
 class Tarefa {
     private String titulo;
     private String descricao;
@@ -116,6 +141,6 @@ class Tarefa {
 
     @Override
     public String toString() {
-        return titulo + " (" + status + ")";
+        return titulo + " - " + status;
     }
 }
